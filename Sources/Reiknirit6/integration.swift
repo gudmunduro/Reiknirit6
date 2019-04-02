@@ -39,12 +39,12 @@ public class Integration {
         var part = 0
         var result: [String] = []
         for c in e {
-            if result.length < part + 1 {
+            if result.count < part + 1 {
                 result.append("")
             }
-            switch part {
+            switch c {
                 case _ where numbers.contains(String(c)):
-                    result[part] += c
+                    result[part] += String(c)
                 case "x":
                     part++
                     result[part] = "x"
@@ -69,7 +69,8 @@ public class Integration {
             case _ where e.contains("cos"):
                 break
             case _ where e.contains("x"):
-                if !newE.components(separatedBy: "x")[0].contains(where: numbers.contains) {
+                print(newE.components(separatedBy: "x")[0])
+                if !newE.components(separatedBy: "x")[0].containsFromArray(numbers) {
                     newE = "1" + newE
                 }
                 if newE.contains("^") {
@@ -83,6 +84,7 @@ public class Integration {
             default:
                 return ""
         }
+        return newE
     }
 
     public func run() -> String
@@ -90,12 +92,15 @@ public class Integration {
         var result = ""
 
         let se = splitEq()
+        print(se)
         let op = findAllPMOperators()
         
         for (e, o) in zip(se, op) {
             result += integrate(e)
             result += o
         }
+
+        return result
     }
 
 }
