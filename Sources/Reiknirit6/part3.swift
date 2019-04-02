@@ -4,7 +4,7 @@ import Common
 // ***
 // Node
 // ***
-class Node {
+fileprivate class Node {
 
     var value: Int
     var left: Node?
@@ -16,7 +16,7 @@ class Node {
 }
 
 // Functions
-extension Node {
+fileprivate extension Node {
 
     var hasAnyChildren: Bool {
         return right != nil || left != nil
@@ -173,7 +173,7 @@ extension Node {
 // ***
 // Tree
 // ***
-class Tree {
+fileprivate class Tree {
 
     var root: Node?
 
@@ -189,7 +189,7 @@ class Tree {
 }
 
 // Functions
-extension Tree {
+fileprivate extension Tree {
 
     func insert(_ value: Int) -> Bool {
         if var root = self.root {
