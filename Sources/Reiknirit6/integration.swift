@@ -1,9 +1,14 @@
 import Common
+import Expression
 
 fileprivate struct EPart {
-    var valueBefore: Int
+    var valueBefore: Float
     var x: String
-    var pow: Int
+    var pow: Float
+}
+
+public enum IntegrationError: Error {
+    case invalidInput(moreInfo: String)
 }
 
 public class Integration {
@@ -47,33 +52,44 @@ public class Integration {
                     result[part] += String(c)
                 case "x":
                     part++
+                    result.append("")
                     result[part] = "x"
-                    part++
                 case "^":
                     part++
                 default: break
             }
         }
 
-        let ePart = EPart(valueBefore: Int(result[0])!, x: result[1], pow: Int(result[2])!)
+        let ePart = EPart(valueBefore: Float(result[0])!, x: result[1], pow: Float(result[2])!)
 
         return ePart
     }
 
-    private func integrate(_ e: String) -> String
+    private func integrate(_ e: String) throws -> String
     {
         var newE = e
+        
         switch e {
             case _ where e.contains("sin"):
-                break
+                guard let startIndex = newE.range(of: "sin("), let endIndex = newE.range(of: ")") else {
+                    throw IntegrationError.invalidInput(moreInfo: "value inside sin function not found")
+                }
+                let inSin = String(newE[startIndex.upperBound...endIndex.lowerBound])
+
+                newE = "-cos(" + inSin + " * " + (try integrate(inSin))
             case _ where e.contains("cos"):
-                break
+                guard let startIndex = newE.range(of: "cos("), let endIndex = newE.range(of: ")") else {
+                    throw IntegrationError.invalidInput(moreInfo: "value inside cos function not found")
+                }
+                let inCos = String(newE[startIndex.upperBound...endIndex.lowerBound])
+
+                newE = "sin(" + inCos + " * " + (try integrate(inCos))
             case _ where e.contains("x"):
-                print(newE.components(separatedBy: "x")[0])
-                if !newE.components(separatedBy: "x")[0].containsFromArray(numbers) {
+                let componentsByX = newE.components(separatedBy: "")
+                if componentsByX.count == 0 || !componentsByX[0].containsFromArray(numbers) {
                     newE = "1" + newE
                 }
-                if newE.contains("^") {
+                if !newE.contains("^") {
                     newE += "^1"
                 }
 
@@ -81,26 +97,40 @@ public class Integration {
 
                 epart.pow += 1
                 epart.valueBefore /= epart.pow
+                newE = String(epart.valueBefore) + epart.x + "^" + String(epart.pow) 
             default:
                 return ""
         }
         return newE
     }
 
-    public func run() -> String
+    private func findArea(_ eq: String, from: Double, to: Double) throws -> Double 
+    {
+        let firstExp = Expression(eq, constants: [
+            "x": to
+        ])
+        let secondExp = Expression(eq, constants: [
+            "x": from
+        ])
+        return (try firstExp.evaluate()) - (try secondExp.evaluate())
+    }
+
+    public func run() throws -> String
     {
         var result = ""
 
         let se = splitEq()
-        print(se)
         let op = findAllPMOperators()
         
-        for (e, o) in zip(se, op) {
-            result += integrate(e)
-            result += o
+        for i in 0..<se.count {
+            result += try integrate(se[i])
+            
+            if op.count > i {
+                result += op[i]
+            }
         }
 
-        return result
+        return String(try findArea(result, from: 1, to: 2))
     }
 
 }

@@ -7,7 +7,11 @@ func runPart1()
         return
     }
     let integration = Integration(eq: inp)
-    let res = integration.run()
+    do {
+        let res = try integration.run()
 
-    print(res)
+        print(res)
+    } catch {
+        print(error)
+    }
 }

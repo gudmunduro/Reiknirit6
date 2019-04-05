@@ -2,6 +2,24 @@
   "object": {
     "pins": [
       {
+        "package": "Expression",
+        "repositoryURL": "https://github.com/nicklockwood/Expression.git",
+        "state": {
+          "branch": null,
+          "revision": "cfe8324c439d7e186057663f8a68df3f283e765e",
+          "version": "0.12.12"
+        }
+      },
+      {
+        "package": "Files",
+        "repositoryURL": "https://github.com/JohnSundell/Files",
+        "state": {
+          "branch": null,
+          "revision": "a84615f4558151fab52ac38df697ce2442991f93",
+          "version": "2.3.0"
+        }
+      },
+      {
         "package": "Common",
         "repositoryURL": "https://github.com/gudmunduroh/ReikniritCommon",
         "state": {
