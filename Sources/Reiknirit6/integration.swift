@@ -39,6 +39,59 @@ public class Integration {
         return result
     }
 
+    private func convertPowSymbolToFunction(on value: String) -> String 
+    {
+        var newValue = value
+        
+        while newValue.contains("^") {
+          mainForLoop: for i in 0..<newValue.count {
+              print("Continuing")
+              if newValue[i] == "^" {
+                  var beforeOp: String = ""
+                  var afterOp: String = ""
+                  var charToRemove: [Int] = [0, 0]
+
+                  findBeforeOp: for i2 in (0..<i).reversed() {
+                      if newValue[i2] == "*" || newValue[i2] == "+" || newValue[i2] == "-" || newValue[i] == "/" || i2 == 0 {
+                          beforeOp = String(newValue[(i2 + 1)..<i])
+                          charToRemove[0] = i2 + 1
+                          break findBeforeOp
+                      }
+                  }
+                  print("Going into next loop")
+                  findAfterOp: for i2 in (i..<newValue.count) {
+                      print(i2)
+                      if !(numbers.contains(String(newValue[i])) || newValue[i] == ".") {
+                          print("!")
+                          print(i)
+                          print(i2 + 1)
+                          print(newValue[i2 + 1])
+                          afterOp = String(newValue[(i + 1)..<(i2 + 2)])
+                          print("after")
+                          print(afterOp)
+                          charToRemove[1] = i2 + 2
+                          break findAfterOp
+                      }
+                  }
+
+                  print(charToRemove[0])
+                  print(charToRemove[1])
+                  print("a")
+                  print(newValue[0..<(i - charToRemove[0])])
+                  print("b")
+                  print(i + charToRemove[1])
+                  print(newValue.count)
+
+                  newValue = newValue[0..<(i - charToRemove[0] + 1)] + "pow(\(beforeOp), \(afterOp))" + ( i + charToRemove[1] >= newValue.count ? "" : (newValue[(i + charToRemove[1])..<newValue.count]) )
+
+                  break mainForLoop
+              }
+          }
+        }
+
+        return newValue
+    }
+
     private func splitSinglePart(_ e: String) -> EPart
     {
         var part = 0
@@ -106,10 +159,11 @@ public class Integration {
 
     private func findArea(_ eq: String, from: Double, to: Double) throws -> Double 
     {
-        let firstExp = Expression(eq, constants: [
+        let newEq = eq.replacingOccurrences(of: "x", with: "*x")
+        let firstExp = Expression(newEq, constants: [
             "x": to
         ])
-        let secondExp = Expression(eq, constants: [
+        let secondExp = Expression(newEq, constants: [
             "x": from
         ])
         return (try firstExp.evaluate()) - (try secondExp.evaluate())
