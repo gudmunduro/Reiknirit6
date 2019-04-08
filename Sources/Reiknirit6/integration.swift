@@ -13,7 +13,7 @@ public enum IntegrationError: Error {
 
 public class Integration {
 
-    private let numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+    private let numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
     let eq: String
 
     public init(eq: String)
@@ -41,54 +41,53 @@ public class Integration {
 
     private func convertPowSymbolToFunction(on value: String) -> String 
     {
-        var newValue = value
-        
-        while newValue.contains("^") {
-          mainForLoop: for i in 0..<newValue.count {
-              print("Continuing")
-              if newValue[i] == "^" {
-                  var beforeOp: String = ""
-                  var afterOp: String = ""
-                  var charToRemove: [Int] = [0, 0]
+        var newValue = ""
+        var lastNum = ""
+        var inPow = false
+        var inNum = false
+        var counter = 0
+        var lastX = ""
 
-                  findBeforeOp: for i2 in (0..<i).reversed() {
-                      if newValue[i2] == "*" || newValue[i2] == "+" || newValue[i2] == "-" || newValue[i] == "/" || i2 == 0 {
-                          beforeOp = String(newValue[(i2 + 1)..<i])
-                          charToRemove[0] = i2 + 1
-                          break findBeforeOp
-                      }
-                  }
-                  print("Going into next loop")
-                  findAfterOp: for i2 in (i..<newValue.count) {
-                      print(i2)
-                      if !(numbers.contains(String(newValue[i])) || newValue[i] == ".") {
-                          print("!")
-                          print(i)
-                          print(i2 + 1)
-                          print(newValue[i2 + 1])
-                          afterOp = String(newValue[(i + 1)..<(i2 + 2)])
-                          print("after")
-                          print(afterOp)
-                          charToRemove[1] = i2 + 2
-                          break findAfterOp
-                      }
-                  }
+        mainFor: for c in value {
+            switch c {
+                case "^":
+                    inPow = true
+                    inNum = false
+                    newValue += "pow(\(lastNum) * \(lastX),"
 
-                  print(charToRemove[0])
-                  print(charToRemove[1])
-                  print("a")
-                  print(newValue[0..<(i - charToRemove[0])])
-                  print("b")
-                  print(i + charToRemove[1])
-                  print(newValue.count)
+                case "x", "y", "z":
+                    if value[counter - 1] == "*" {
+                        newValue = newValue[0..<(newValue.count - 1 - lastNum.count)]
+                    }
+                    lastX = String(c)
 
-                  newValue = newValue[0..<(i - charToRemove[0] + 1)] + "pow(\(beforeOp), \(afterOp))" + ( i + charToRemove[1] >= newValue.count ? "" : (newValue[(i + charToRemove[1])..<newValue.count]) )
+                case _ where numbers.contains(String(c)) || c == ".":
+                    if !inNum {
+                        inNum = true
+                        lastNum = ""
+                    }
+                    lastNum += String(c)
+                    if counter == value.count - 1 { fallthrough }
 
-                  break mainForLoop
-              }
-          }
+                case "+", "-", "*", "/", ")", " ":
+                    guard inPow else { fallthrough }
+                    
+                    inPow = false
+                    inNum = false
+                    newValue += lastNum + ")"
+                    guard let lastOfLastNum = lastNum.last else { continue mainFor }
+                    if c != lastOfLastNum { newValue += String(c) }
+
+                default:
+                    if inNum {
+                        newValue += lastNum
+                    }
+                    inNum = false
+                    newValue += String(c)
+            }
+            counter++
         }
-
+        
         return newValue
     }
 
@@ -157,9 +156,11 @@ public class Integration {
         return newE
     }
 
-    private func findArea(_ eq: String, from: Double, to: Double) throws -> Double 
+    public func findArea(_ eq: String, from: Double, to: Double) throws -> Double 
     {
-        let newEq = eq.replacingOccurrences(of: "x", with: "*x")
+        print(eq.replacingOccurrences(of: "x", with: "*x"))
+        let newEq = convertPowSymbolToFunction(on: eq.replacingOccurrences(of: "x", with: "*x"))
+        print(newEq)
         let firstExp = Expression(newEq, constants: [
             "x": to
         ])
@@ -169,7 +170,31 @@ public class Integration {
         return (try firstExp.evaluate()) - (try secondExp.evaluate())
     }
 
-    public func run() throws -> String
+    public func fullIntegrate() throws -> String 
+    {
+        print("a1")
+        var result = ""
+
+        let se = splitEq()
+        print("a2")
+        let op = findAllPMOperators()
+        print("a3")
+        
+        for i in 0..<se.count {
+            print("a4.\(i)")
+            result += try integrate(se[i])
+            
+            if op.count > i {
+                print("a5.\(i)")
+                result += op[i]
+            }
+        }
+        print("a6")
+
+        return result
+    }
+
+    public func run(from: Double, to: Double) throws -> String
     {
         var result = ""
 
@@ -184,7 +209,7 @@ public class Integration {
             }
         }
 
-        return String(try findArea(result, from: 1, to: 2))
+        return String(try findArea(result, from: from, to: to))
     }
 
 }
