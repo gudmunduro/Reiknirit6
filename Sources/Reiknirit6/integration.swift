@@ -112,7 +112,7 @@ public class Integration {
             }
         }
 
-        let ePart = EPart(valueBefore: Float(result[0])!, x: result[1], pow: Float(result[2])!)
+        let ePart = EPart(valueBefore: Float(result[0]) ?? 1.0, x: result[1], pow: Float(result[2]) ?? 1.0)
 
         return ePart
     }
@@ -158,7 +158,6 @@ public class Integration {
 
     public func findArea(_ eq: String, from: Double, to: Double) throws -> Double 
     {
-        print(eq.replacingOccurrences(of: "x", with: "*x"))
         let newEq = convertPowSymbolToFunction(on: eq.replacingOccurrences(of: "x", with: "*x"))
         print(newEq)
         let firstExp = Expression(newEq, constants: [
@@ -172,24 +171,18 @@ public class Integration {
 
     public func fullIntegrate() throws -> String 
     {
-        print("a1")
         var result = ""
 
         let se = splitEq()
-        print("a2")
         let op = findAllPMOperators()
-        print("a3")
         
         for i in 0..<se.count {
-            print("a4.\(i)")
             result += try integrate(se[i])
             
             if op.count > i {
-                print("a5.\(i)")
                 result += op[i]
             }
         }
-        print("a6")
 
         return result
     }

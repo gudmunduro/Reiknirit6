@@ -17,12 +17,10 @@ func runPart1()
     let integ1 = Integration(eq: f)
     let integ2 = Integration(eq: g)
     do {
-        print("!1")
         let int1 = try integ1.fullIntegrate()
-        print("!2")
         let int2 = try integ2.fullIntegrate()
 
-        print("Flatarmálið milli f(x) og g(x) er :\((try integ1.findArea(int1, from: from, to: to)) - (try integ2.findArea(int2, from: from, to: to)))")
+        print("Flatarmálið milli f(x) og g(x) er: \((try integ1.findArea(int1, from: from, to: to)) - (try integ2.findArea(int2, from: from, to: to)))")
     } catch {
         print(error)
     }
